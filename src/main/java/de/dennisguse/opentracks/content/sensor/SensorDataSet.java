@@ -12,6 +12,8 @@ public final class SensorDataSet {
 
     private SensorDataCycling.Speed cyclingSpeed;
 
+    private SensorDataCyclingPower cyclingPower;
+
     public SensorDataSet() {
     }
 
@@ -25,6 +27,10 @@ public final class SensorDataSet {
 
     public SensorDataCycling.Speed getCyclingSpeed() {
         return cyclingSpeed;
+    }
+
+    public SensorDataCyclingPower getCyclingPower() {
+        return cyclingPower;
     }
 
     public void set(SensorData data) {
@@ -41,6 +47,10 @@ public final class SensorDataSet {
             this.cyclingSpeed = (SensorDataCycling.Speed) data;
             return;
         }
+        if (data instanceof SensorDataCyclingPower) {
+            this.cyclingPower = (SensorDataCyclingPower) data;
+            return;
+        }
 
         throw new UnsupportedOperationException();
     }
@@ -49,6 +59,7 @@ public final class SensorDataSet {
         this.heartRate = null;
         this.cyclingCadence = null;
         this.cyclingSpeed = null;
+        this.cyclingPower = null;
     }
 
     public void fillTrackPoint(TrackPoint trackPoint) {
@@ -63,6 +74,10 @@ public final class SensorDataSet {
         if (cyclingSpeed != null && cyclingSpeed.hasSpeed_mps()) {
             trackPoint.setSpeed(cyclingSpeed.getSpeed_mps());
         }
+
+        if (cyclingPower != null && cyclingPower.hasPower_w()) {
+            trackPoint.setPower(cyclingPower.getPower_w());
+        }
     }
 
     @NonNull
@@ -70,6 +85,7 @@ public final class SensorDataSet {
     public String toString() {
         return (getHeartRate() != null ? "" + getHeartRate() : "")
                 + (getCyclingCadence() != null ? " " + getCyclingCadence() : "")
-                + (getCyclingSpeed() != null ? " " + getCyclingSpeed() : "");
+                + (getCyclingSpeed() != null ? " " + getCyclingSpeed() : "")
+                + (getCyclingPower() != null ? " " + getCyclingPower() : "");
     }
 }

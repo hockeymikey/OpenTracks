@@ -26,6 +26,7 @@ import de.dennisguse.opentracks.content.data.Marker;
 import de.dennisguse.opentracks.content.data.Track;
 import de.dennisguse.opentracks.content.data.TrackPoint;
 import de.dennisguse.opentracks.content.sensor.SensorDataCycling;
+import de.dennisguse.opentracks.content.sensor.SensorDataCyclingPower;
 import de.dennisguse.opentracks.content.sensor.SensorDataHeartRate;
 import de.dennisguse.opentracks.content.sensor.SensorDataSet;
 import de.dennisguse.opentracks.services.TrackRecordingServiceConnection;
@@ -104,6 +105,9 @@ public class StatisticsRecordingFragment extends Fragment implements TrackDataLi
     private Group cadenceGroup;
     private TextView cadenceValueView;
     private TextView cadenceSensorView;
+    private Group powerGroup;
+    private TextView powerValueView;
+    private TextView powerSensorView;
 
     private TextView totalTimeValueView;
     private final Runnable updateUIeachSecond = new Runnable() {
@@ -157,6 +161,10 @@ public class StatisticsRecordingFragment extends Fragment implements TrackDataLi
         cadenceGroup = view.findViewById(R.id.stats_sensor_cadence_group);
         cadenceValueView = view.findViewById(R.id.stats_sensor_cadence_value);
         cadenceSensorView = view.findViewById(R.id.stats_sensor_cadence_sensor_value);
+
+        powerGroup = view.findViewById(R.id.stats_sensor_power_group);
+        powerValueView = view.findViewById(R.id.stats_sensor_power_value);
+        powerSensorView = view.findViewById(R.id.stats_sensor_power_sensor_value);
 
         totalTimeValueView = view.findViewById(R.id.stats_total_time_value);
 
@@ -257,6 +265,9 @@ public class StatisticsRecordingFragment extends Fragment implements TrackDataLi
         cadenceGroup = null;
         cadenceValueView = null;
         cadenceSensorView = null;
+        powerGroup = null;
+        powerValueView = null;
+        powerSensorView = null;
 
         totalTimeValueView = null;
 
@@ -428,7 +439,8 @@ public class StatisticsRecordingFragment extends Fragment implements TrackDataLi
 
         setHeartRateSensorData(sensorDataSet);
         setCadenceSensorData(sensorDataSet);
-        setSpeedSensorData(sensorDataSet, isSelectedTrackRecording());
+        setPowerSensorData(sensorDataSet);
+        setSpeedSensorData(sensorDataSet);
 
         setTotalElevationGain(elevationGain_m);
     }
@@ -479,6 +491,29 @@ public class StatisticsRecordingFragment extends Fragment implements TrackDataLi
         cadenceValueView.setText(sensorValue);
     }
 
+    private void setPowerSensorData(SensorDataSet sensorDataSet) {
+        int isVisible = View.VISIBLE;
+        if (PreferencesUtils.isBluetoothCyclingPowerSensorAddressNone(getContext())) {
+            isVisible = View.GONE;
+        }
+        powerGroup.setVisibility(isVisible);
+        setVisibilitySensorHorizontalLine();
+
+        String sensorValue = getContext().getString(R.string.value_unknown);
+        String sensorName = getContext().getString(R.string.value_unknown);
+        if (sensorDataSet != null && sensorDataSet.getCyclingPower() != null) {
+            SensorDataCyclingPower data = sensorDataSet.getCyclingPower();
+            sensorName = data.getSensorName();
+
+            if (data.hasPower_w() && data.isRecent()) {
+                sensorValue = StringUtils.formatDecimal(data.getPower_w(), 0);
+            }
+        }
+
+        powerSensorView.setText(sensorName);
+        powerValueView.setText(sensorValue);
+    }
+
     // Set elevation gain
     private void setTotalElevationGain(Float elevationGain_m) {
         //TODO Check if we can distribute the total elevation gain via trackStatistics instead of doing some computation in the UI layer.
@@ -508,14 +543,12 @@ public class StatisticsRecordingFragment extends Fragment implements TrackDataLi
         }
     }
 
-    private void setSpeedSensorData(SensorDataSet sensorDataSet, boolean isRecording) {
-        if (isRecording) {
-            if (sensorDataSet != null && sensorDataSet.getCyclingSpeed() != null) {
-                SensorDataCycling.Speed data = sensorDataSet.getCyclingSpeed();
+    private void setSpeedSensorData(SensorDataSet sensorDataSet) {
+        if (sensorDataSet != null && sensorDataSet.getCyclingSpeed() != null) {
+            SensorDataCycling.Speed data = sensorDataSet.getCyclingSpeed();
 
-                if (data.hasSpeed_mps() && data.isRecent()) {
-                    setSpeed(data.getSpeed_mps());
-                }
+            if (data.hasSpeed_mps() && data.isRecent()) {
+                setSpeed(data.getSpeed_mps());
             }
         }
     }
